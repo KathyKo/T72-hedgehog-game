@@ -11,6 +11,8 @@ const STORY_SCRIPT = [
 ];
 
 const App: React.FC = () => {
+  const BASE_PATH = '/T72-hedgehog-game';
+
   const [stage, setStage] = useState<GameStage>(GameStage.START);
   const [pendingStage, setPendingStage] = useState<GameStage | null>(null);
   const [isFail, setIsFail] = useState(false);
@@ -19,9 +21,8 @@ const App: React.FC = () => {
   const [storyIndex, setStoryIndex] = useState(0);
   const [isVideoEnded, setIsVideoEnded] = useState(false);
 
-  // 👇 倒數計時狀態
+  // 倒數計時狀態
   const [timeLeft, setTimeLeft] = useState(40);
-
   const [inventory, setInventory] = useState<Inventory>({
     blueCrystal: false, goldenRope: false, shinyShield: false, certificate: false,
   });
@@ -30,16 +31,16 @@ const App: React.FC = () => {
   const currentLevelIndex = LEVELS.findIndex(l => l.id === stage);
   const currentLevel = LEVELS[currentLevelIndex];
 
-  // 音效播放 Helper
+  // 音效播放 Helper (修正路徑)
   const playSound = (type: 'correct' | 'wrong' | 'victory' | 'click' | 'boss-defeat') => {
     if (!isAudioInitialized) return;
     let audioPath = '';
     switch (type) {
-      case 'correct': audioPath = '/sounds/correct.mp3'; break;
-      case 'wrong': audioPath = '/sounds/wrong.mp3'; break;
-      case 'victory': audioPath = '/sounds/victory.mp3'; break;
-      case 'click': audioPath = '/sounds/blip.mp3'; break;
-      case 'boss-defeat': audioPath = '/sounds/boss-defeat.mp3'; break;
+      case 'correct': audioPath = `${BASE_PATH}/sounds/correct.mp3`; break;
+      case 'wrong': audioPath = `${BASE_PATH}/sounds/wrong.mp3`; break;
+      case 'victory': audioPath = `${BASE_PATH}/sounds/victory.mp3`; break;
+      case 'click': audioPath = `${BASE_PATH}/sounds/blip.mp3`; break;
+      case 'boss-defeat': audioPath = `${BASE_PATH}/sounds/boss-defeat.mp3`; break;
       default: return;
     }
     const audio = new Audio(audioPath);
@@ -51,37 +52,37 @@ const App: React.FC = () => {
     if (isAudioInitialized) return;
     setIsAudioInitialized(true);
     if (!bgmRef.current) {
-      bgmRef.current = new Audio('/sounds/bgm-start.mp3');
+      bgmRef.current = new Audio(`${BASE_PATH}/sounds/bgm-start.mp3`);
       bgmRef.current.loop = true;
       bgmRef.current.volume = 0.3;
     }
     bgmRef.current.play().catch(e => console.error("Audio unlock failed:", e));
   };
 
-  // BGM 控制邏輯
+  // BGM 控制邏輯 (修正路徑)
   useEffect(() => {
     if (!isAudioInitialized) return;
     let targetBgm = '';
     switch (stage) {
       case GameStage.START:
-      case GameStage.INTRO: targetBgm = '/sounds/bgm-start.mp3'; break;
-      case GameStage.INTER_LEVEL: targetBgm = '/sounds/bgm-transition.mp3'; break;
-      case GameStage.LEVEL_1: targetBgm = '/sounds/bgm-level1.mp3'; break;
-      case GameStage.LEVEL_2: targetBgm = '/sounds/bgm-level2.mp3'; break;
-      case GameStage.LEVEL_3: targetBgm = '/sounds/bgm-level3.mp3'; break;
-      case GameStage.LEVEL_4: targetBgm = '/sounds/bgm-level4.mp3'; break;
+      case GameStage.INTRO: targetBgm = `${BASE_PATH}/sounds/bgm-start.mp3`; break;
+      case GameStage.INTER_LEVEL: targetBgm = `${BASE_PATH}/sounds/bgm-transition.mp3`; break;
+      case GameStage.LEVEL_1: targetBgm = `${BASE_PATH}/sounds/bgm-level1.mp3`; break;
+      case GameStage.LEVEL_2: targetBgm = `${BASE_PATH}/sounds/bgm-level2.mp3`; break;
+      case GameStage.LEVEL_3: targetBgm = `${BASE_PATH}/sounds/bgm-level3.mp3`; break;
+      case GameStage.LEVEL_4: targetBgm = `${BASE_PATH}/sounds/bgm-level4.mp3`; break;
 
       case GameStage.SUMMARY:
-        targetBgm = '/sounds/wins.mp3';
+        targetBgm = `${BASE_PATH}/sounds/wins.mp3`;
         break;
       case GameStage.ENDING:
         targetBgm = ''; // 播放影片時，背景音樂靜音
         break;
       case GameStage.VICTORY:
-        targetBgm = '/sounds/wins.mp3'; // 影片結束後，恢復 wins.mp3
+        targetBgm = `${BASE_PATH}/sounds/wins.mp3`; // 影片結束後，恢復 wins.mp3
         break;
 
-      default: targetBgm = '/sounds/bgm-start.mp3'; break;
+      default: targetBgm = `${BASE_PATH}/sounds/bgm-start.mp3`; break;
     }
 
     if (!bgmRef.current) {
@@ -91,9 +92,10 @@ const App: React.FC = () => {
     }
 
     const audioEl = bgmRef.current;
-    const currentSrcPath = audioEl.src ? audioEl.src.split(window.location.origin)[1] : '';
+    // 檢查 src 是否包含目標 BGM (解決 GitHub Pages 完整路徑比對問題)
+    const currentSrc = audioEl.src || '';
 
-    if (targetBgm && (currentSrcPath !== targetBgm)) {
+    if (targetBgm && !currentSrc.includes(targetBgm)) {
       audioEl.src = targetBgm;
       audioEl.play().catch(e => console.log("BGM play error", e));
     } else if (!targetBgm) {
@@ -151,7 +153,7 @@ const App: React.FC = () => {
 
   useEffect(() => { if (stage === GameStage.INTER_LEVEL && pendingStage) { const timer = setTimeout(() => { setStage(pendingStage); setPendingStage(null); }, 3000); return () => clearTimeout(timer); } }, [stage, pendingStage]);
 
-  // 👇 VICTORY 頁面倒數計時邏輯 (依照需求改為 40 秒)
+  //  VICTORY 頁面倒數計時邏輯
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (stage === GameStage.VICTORY) {
@@ -195,14 +197,15 @@ const App: React.FC = () => {
       {stage === GameStage.INTRO && (<div className="w-full h-full relative flex items-end justify-center bg-black/60 backdrop-blur-md animate-fade-in" onClick={handleNextStory}><div className="absolute inset-0 -z-10 bg-cover bg-center blur-sm opacity-50" style={{ backgroundImage: `url('${ASSETS.introBg}')` }}></div><div className="absolute bottom-32 md:bottom-40 z-10 animate-float"><img src={STORY_SCRIPT[storyIndex].image} alt="Speaker" className="w-64 md:w-96 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]" /></div><div className="w-full max-w-4xl mb-12 md:mb-20 mx-4 z-20 cursor-pointer group"><div className="bg-white/95 rounded-[2rem] border-8 border-blue-500 p-8 shadow-2xl relative min-h-[180px] flex flex-col justify-center"><div className="absolute -top-6 left-10 bg-yellow-400 text-blue-900 font-black px-6 py-2 rounded-full border-4 border-white shadow-md text-xl">{STORY_SCRIPT[storyIndex].speaker}</div><p className="text-2xl md:text-3xl font-bold text-gray-800 leading-relaxed whitespace-pre-line">{STORY_SCRIPT[storyIndex].text}</p><div className="absolute bottom-4 right-6 text-blue-500 animate-bounce"><svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></div></div><p className="text-center text-white/50 mt-4 text-lg font-bold tracking-widest">點擊繼續...</p></div></div>)}
       {stage === GameStage.INTER_LEVEL && (<div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden"><div className="absolute inset-0 opacity-20">{[...Array(20)].map((_, i) => (<div key={i} className="absolute h-1 bg-blue-400 w-full animate-slide-left" style={{ top: `${Math.random() * 100}%`, animationDuration: `${0.5 + Math.random()}s` }}></div>))}</div><div className="relative z-10 animate-bounce"><img src={ASSETS.hedgehogGo} alt="Running" className="w-48 h-48 object-contain" /></div><h2 className="text-white text-4xl font-black mt-8 animate-pulse tracking-widest font-['Chiron_GoRound_TC']">前往下一世界...</h2></div>)}
 
-      {/* 遊戲關卡 (LEVEL 1-4) 保持不變 */}
+      {/* 遊戲關卡 (LEVEL 1-4) 保持不變，因為圖片已經從 ASSETS 引入 */}
       {currentLevel && (
         <div className="w-full h-full relative overflow-hidden mario-transition" style={{ backgroundImage: getBackgroundImage(), backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: getBackgroundColor() }}>
           <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
             {stage !== GameStage.LEVEL_4 && (<div className="absolute bottom-[15%] left-[5%] w-[30%] hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>)}
-            {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1 ${showReward ? 'monster-die' : ''}`}><img src="/water-monster.png" alt="Enemy" className="w-full object-contain opacity-90 drop-shadow-lg" /></div><div className={`absolute top-[20%] right-[35%] w-[20%] enemy-float delay-2 ${showReward ? 'monster-die' : ''}`}><img src="/water-monster.png" alt="Enemy" className="w-full object-contain opacity-80" /></div><div className={`absolute top-[10%] right-[30%] w-[8%] enemy-float delay-3 ${showReward ? 'monster-die' : ''}`}><img src="/water-monster.png" alt="Enemy" className="w-full object-contain opacity-70" /></div><div className={`absolute bottom-[15%] right-[3%] w-[8%] enemy-float delay-4 ${showReward ? 'monster-die' : ''}`}><img src="/water-monster.png" alt="Enemy" className="w-full object-contain opacity-60" /></div><div className={`absolute top-[5%] right-[50%] w-[5%] enemy-float delay-5 ${showReward ? 'monster-die' : ''}`}><img src="/water-monster.png" alt="Enemy" className="w-full object-contain opacity-50" /></div></div>)}
-            {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute bottom-[10%] right-[1%] w-[45%] enemy-grind delay-1 ${showReward ? 'monster-sink' : ''}`}><img src="/sandpaper-monster.png" alt="Sandpaper" className="w-full object-contain drop-shadow-xl" /></div><div className={`absolute bottom-[30%] right-[40%] w-[25%] enemy-grind delay-2 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.15s' }}><img src="/sandpaper-monster.png" alt="Sandpaper" className="w-full object-contain" /></div><div className={`absolute bottom-[5%] right-[45%] w-[18%] enemy-grind delay-3 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.25s' }}><img src="/sandpaper-monster.png" alt="Sandpaper" className="w-full object-contain blur-[1px]" /></div><div className={`absolute top-[40%] right-[3%] w-[15%] enemy-grind delay-4 ${showReward ? 'monster-sink' : ''}`}><img src="/sandpaper-monster.png" alt="Sandpaper" className="w-full object-contain opacity-80 blur-[2px]" /></div></div>)}
-            {stage === GameStage.LEVEL_3 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[15%] w-[35%] enemy-aggressive delay-1 ${showReward ? 'monster-implode' : ''}`}><img src="/glitch-monster.png" alt="Glitch" className="w-full object-contain drop-shadow-2xl" /></div><div className={`absolute bottom-[40%] right-[50%] w-[15%] enemy-aggressive delay-2 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.1s' }}><img src="/glitch-monster.png" alt="Glitch" className="w-full object-contain" /></div><div className={`absolute top-[10%] right-[45%] w-[12%] enemy-aggressive delay-3 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.12s' }}><img src="/glitch-monster.png" alt="Glitch" className="w-full object-contain blur-[1px]" /></div><div className={`absolute bottom-[5%] right-[5%] w-[20%] enemy-aggressive delay-4 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.18s' }}><img src="/glitch-monster.png" alt="Glitch" className="w-full object-contain opacity-80" /></div></div>)}
+            {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-90 drop-shadow-lg" /></div><div className={`absolute top-[20%] right-[35%] w-[20%] enemy-float delay-2 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-80" /></div><div className={`absolute top-[10%] right-[30%] w-[8%] enemy-float delay-3 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-70" /></div><div className={`absolute bottom-[15%] right-[3%] w-[8%] enemy-float delay-4 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-60" /></div><div className={`absolute top-[5%] right-[50%] w-[5%] enemy-float delay-5 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-50" /></div></div>)}
+            {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute bottom-[10%] right-[1%] w-[45%] enemy-grind delay-1 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain drop-shadow-xl" /></div><div className={`absolute bottom-[30%] right-[40%] w-[25%] enemy-grind delay-2 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.15s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain" /></div><div className={`absolute bottom-[5%] right-[45%] w-[18%] enemy-grind delay-3 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.25s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain blur-[1px]" /></div><div className={`absolute top-[40%] right-[3%] w-[15%] enemy-grind delay-4 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain opacity-80 blur-[2px]" /></div></div>)}
+            {stage === GameStage.LEVEL_3 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[15%] w-[35%] enemy-aggressive delay-1 ${showReward ? 'monster-implode' : ''}`}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain drop-shadow-2xl" /></div><div className={`absolute bottom-[40%] right-[50%] w-[15%] enemy-aggressive delay-2 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.1s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain" /></div><div className={`absolute top-[10%] right-[45%] w-[12%] enemy-aggressive delay-3 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.12s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain blur-[1px]" /></div><div className={`absolute bottom-[5%] right-[5%] w-[20%] enemy-aggressive delay-4 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.18s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain opacity-80" /></div></div>)}
+
             {stage === GameStage.LEVEL_4 && (
               <div className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${showReward ? 'opacity-0' : 'opacity-100'}`}>
                 <div className="absolute inset-0 z-0 flex items-center justify-center opacity-70 pointer-events-none mix-blend-screen"><svg className="w-[180%] h-[180%]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g className="vortex-spin-cw"><circle cx="250" cy="250" r="100" fill="none" stroke="white" strokeWidth="2" strokeDasharray="30 20" opacity="0.6" /><circle cx="250" cy="250" r="180" fill="none" stroke="white" strokeWidth="1" strokeDasharray="50 50" opacity="0.4" /></g><g className="vortex-spin-ccw"><circle cx="250" cy="250" r="140" fill="none" stroke="white" strokeWidth="3" strokeDasharray="20 40" opacity="0.8" /><circle cx="250" cy="250" r="220" fill="none" stroke="white" strokeWidth="1" strokeDasharray="10 30" opacity="0.3" /></g></svg></div>
@@ -239,21 +242,22 @@ const App: React.FC = () => {
       {stage === GameStage.SUMMARY && (<div className="w-full h-full relative flex flex-col items-center justify-center bg-cover bg-center animate-fade-in" style={{ backgroundImage: `url('${ASSETS.summaryBg}')` }}><div className="absolute inset-0 bg-white/40 backdrop-blur-[3px]"></div><div className="relative z-10 flex flex-col items-center max-w-5xl w-full p-4"><div className="relative mb-6"><div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-50 rounded-full animate-pulse"></div><img src={ASSETS.hedgehogEnd} alt="Cici Sleeping" className="w-72 md:w-96 relative z-10 hero-float-animation" /></div><div className="bg-white/95 rounded-[3rem] border-8 border-yellow-400 p-10 md:p-12 shadow-2xl text-center relative w-full"><h2 className="text-4xl md:text-5xl font-black text-blue-900 mb-6 font-['ZCOOL_KuaiLe']">天絲 Plus+ 的秘密</h2><p className="text-xl md:text-2xl text-gray-700 font-bold leading-relaxed mb-8 text-left md:text-center px-4">使用 Micro LF 級天絲纖維，透過特殊工藝處理，<br className="hidden md:block" />有效降低原纖化現象，即使多次洗滌也能<br className="hidden md:block" /><span className="text-yellow-600 font-black text-3xl">防止起毛球</span>，維持光澤與柔軟觸感！</p><button onClick={handleSummaryNext} className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 text-white px-16 py-5 rounded-full text-3xl font-black shadow-lg hover:scale-105 transition-transform active:scale-95">下一頁 ➔</button></div></div></div>)}
 
       {/* ENDING (影片) */}
-      {stage === GameStage.ENDING && (<div className="w-full h-full bg-black flex items-center justify-center"><video src="/ending.mp4" autoPlay playsInline onEnded={handleVideoEnded} className="w-full h-full object-contain md:object-cover" /></div>)}
+      {stage === GameStage.ENDING && (
+        <div className="w-full h-full bg-black flex items-center justify-center">
+          <video src={`${BASE_PATH}/ending.mp4`} autoPlay playsInline onEnded={handleVideoEnded} className="w-full h-full object-contain md:object-cover" />
+        </div>
+      )}
 
       {/* === VICTORY (領獎) - 更新版 === */}
       {stage === GameStage.VICTORY && (
         <div className="relative w-full h-full text-center animate-pop-in p-6 z-30 bg-cover bg-center" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
-          {/* 背景遮罩 (減弱至 10%) */}
+          {/* 背景遮罩 */}
           <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
 
           {/* 內容容器：置於底部 */}
           <div className="absolute inset-x-0 bottom-0 p-8 pb-12 flex flex-col items-center justify-center gap-6 z-10">
 
-            {/* 標題已移除 */}
-
             <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 shadow-2xl mb-2 w-[400px] h-[180px] flex flex-col justify-center items-center mx-auto relative">
-              {/* Emoji 已移除 */}
               <p className="text-3xl font-black text-gray-800 mb-6 leading-normal">
                 請拍攝此畫面，於結帳時<br />
                 <span className="text-blue-600 text-4xl">T72系列滿千折50</span>
@@ -267,11 +271,9 @@ const App: React.FC = () => {
             </div>
 
             <div className="flex gap-6 justify-center">
-              {/* 前往購買按鈕 (無連結，純顯示) */}
               <button className="bg-blue-600 cursor-default text-white px-10 py-4 rounded-full text-2xl font-black shadow-lg opacity-90">
                 前往購買
               </button>
-              {/* 回到首頁按鈕 */}
               <button onClick={resetGame} className="bg-white text-gray-600 border-4 border-gray-200 px-10 py-4 rounded-full text-2xl font-black hover:bg-gray-50 transition-colors">
                 回到首頁
               </button>

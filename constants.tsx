@@ -1,5 +1,7 @@
 import { GameStage, QuizLevelData } from './types';
 
+const BASE_PATH = '/T72-hedgehog-game';
+
 export const LEVELS: QuizLevelData[] = [
   {
     id: GameStage.LEVEL_1,
@@ -53,31 +55,31 @@ export const LEVELS: QuizLevelData[] = [
 
 export const ASSETS = {
   // 道具 Icons
-  blueCrystal: '/blue-crystal-icon.png',
-  goldenRope: '/golden-rope.png',
-  shinyShield: '/shiny-shield.png',
-  certificate: '/everlasting-cape.png',
+  blueCrystal: `${BASE_PATH}/blue-crystal-icon.png`,
+  goldenRope: `${BASE_PATH}/golden-rope.png`,
+  shinyShield: `${BASE_PATH}/shiny-shield.png`,
+  certificate: `${BASE_PATH}/everlasting-cape.png`,
 
   // 背景圖 
-  startBg: '/start-bg.png',
-  introBg: '/intro-bg.png',
-  summaryBg: '/summary-bg.jpg',
-  level1Bg: '/level1-bg.png',
-  level2Bg: '/level2-bg.png',
-  level3Bg: '/level3-bg.png',
-  level4Bg: '/level4-bg.png',
-  endBg: '/end.png',
+  startBg: `${BASE_PATH}/start-bg.png`,
+  introBg: `${BASE_PATH}/intro-bg.png`,
+  summaryBg: `${BASE_PATH}/summary-bg.jpg`,
+  level1Bg: `${BASE_PATH}/level1-bg.png`,
+  level2Bg: `${BASE_PATH}/level2-bg.png`,
+  level3Bg: `${BASE_PATH}/level3-bg.png`,
+  level4Bg: `${BASE_PATH}/level4-bg.png`,
+  endBg: `${BASE_PATH}/end.png`,
 
   // 角色
-  hedgehogHappy: '/hedgehog-happy.png',
-  hedgehogCry: '/hedgehog-sad.png',
-  hedgehogWorried: '/hedgehog-worried.png',
-  hedgehogGo: '/hedgehog-go.png',
-  hedgehogBattle: '/hedgehog-battle.png',
-  hedgehogEnd: '/hedgehog-end.png',
+  hedgehogHappy: `${BASE_PATH}/hedgehog-happy.png`,
+  hedgehogCry: `${BASE_PATH}/hedgehog-sad.png`,
+  hedgehogWorried: `${BASE_PATH}/hedgehog-worried.png`,
+  hedgehogGo: `${BASE_PATH}/hedgehog-go.png`,
+  hedgehogBattle: `${BASE_PATH}/hedgehog-battle.png`,
+  hedgehogEnd: `${BASE_PATH}/hedgehog-end.png`,
 
   // 敵人與其他
-  monster: '/water-monster.png',
-  finalBoss: '/final-boss.png',
-  cloud: '/cloud.png',
+  monster: `${BASE_PATH}/water-monster.png`,
+  finalBoss: `${BASE_PATH}/final-boss.png`,
+  cloud: `${BASE_PATH}/cloud.png`,
 };
