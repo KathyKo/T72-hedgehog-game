@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毛球大作戰 - Tencel+ 互動體驗</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Chiron GoRound TC"', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@500;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #060b28;
+            /* 預設字體 */
+            font-family: 'Chiron GoRound TC', sans-serif;
+        }
+
+        /* === 星星特效 === */
+        @keyframes twinkle {
+
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(0.5);
+                box-shadow: 0 0 2px white;
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+                box-shadow: 0 0 10px white, 0 0 20px #fde047;
+            }
+        }
+
+        .star-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        /* === 按鈕呼吸燈 === */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.7);
+            }
+        }
+
+        .hotspot-btn {
+            cursor: pointer;
+            animation: pulse-glow 2s infinite;
+        }
+
+        /* === 怪獸/刺蝟光環 === */
+        @keyframes monster-breath {
+
+            0%,
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: scale(1.1) rotate(0deg);
+                opacity: 0.7;
+            }
+        }
+
+        .monster-aura {
+            border-radius: 70%;
+            animation: monster-breath 2s infinite ease-in-out;
+            mix-blend-mode: screen;
+            background: radial-gradient(circle, rgba(255, 50, 50, 0.6) 1%, rgba(255, 0, 0, 0) 80%);
+        }
+
+        @keyframes hedgehog-breath {
+
+            0%,
+            100% {
+                transform: translateY(0px) scale(1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: translateY(-5px) scale(1.1);
+                opacity: 0.6;
+            }
+        }
+
+        .hedgehog-aura {
+            border-radius: 50%;
+            animation: hedgehog-breath 4s infinite ease-in-out;
+            mix-blend-mode: screen;
+            background: radial-gradient(circle, rgba(255, 255, 200, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        /* === 轉場特效 === */
+        @keyframes iris-open {
+            0% {
+                clip-path: circle(0% at center);
+                background-color: black;
+            }
+
+            100% {
+                clip-path: circle(150% at center);
+                background-color: transparent;
+            }
+        }
+
+        .mario-transition {
+            animation: iris-open 1.5s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+        }
+
+        @keyframes float-up-down {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .enemy-float {
+            animation: float-up-down 3s infinite ease-in-out;
+        }
+
+        @keyframes hero-float {
+
+            0%,
+            100% {
+                transform: translateY(0px) scale(1);
+            }
+
+            50% {
+                transform: translateY(-10px) scale(1.03);
+            }
+        }
+
+        .hero-float-animation {
+            animation: hero-float 2.5s infinite ease-in-out;
+        }
+
+        /* === 怪獸死亡/寶物特效 === */
+        @keyframes monster-defeat {
+            0% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+                filter: hue-rotate(0deg);
+            }
+
+            20% {
+                transform: scale(1.2) rotate(-10deg);
+                filter: hue-rotate(90deg) brightness(2);
+            }
+
+            100% {
+                transform: scale(0) rotate(720deg) translateY(-500px);
+                opacity: 0;
+            }
+        }
+
+        .monster-die {
+            animation: monster-defeat 2.0s forwards ease-in;
+        }
+
+        @keyframes item-pop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            60% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .item-get-modal {
+            animation: item-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* === Level 2 特效 === */
+        @keyframes grind-shake {
+            0% {
+                transform: translateX(0px) rotate(0deg);
+            }
+
+            25% {
+                transform: translateX(-3px) rotate(-2deg);
+            }
+
+            75% {
+                transform: translateX(3px) rotate(2deg);
+            }
+
+            100% {
+                transform: translateX(0px) rotate(0deg);
+            }
+        }
+
+        .enemy-grind {
+            animation: grind-shake 0.2s infinite linear;
+        }
+
+        @keyframes sink-down {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            20% {
+                transform: translateY(-20px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(500px);
+                opacity: 0;
+            }
+        }
+
+        .monster-sink {
+            animation: sink-down 0.8s forwards ease-in;
+        }
+
+        /* === Level 3 特效 === */
+        @keyframes aggressive-shake {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            25% {
+                transform: translate(-4px, 4px) scale(1.02);
+            }
+
+            50% {
+                transform: translate(4px, -4px) scale(0.98);
+            }
+
+            75% {
+                transform: translate(-4px, -4px) scale(1.02);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        .enemy-aggressive {
+            animation: aggressive-shake 0.15s infinite linear;
+        }
+
+        @keyframes implode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                filter: brightness(1);
+            }
+
+            40% {
+                transform: scale(1.3);
+                opacity: 0.8;
+                filter: brightness(2);
+            }
+
+            100% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+
+        .monster-implode {
+            animation: implode 0.5s forwards ease-in-out;
+        }
+
+        /* === Level 4 專屬特效 === */
+        @keyframes fast-spin-cw {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fast-spin-ccw {
+            from {
+                transform: rotate(360deg);
+            }
+
+            to {
+                transform: rotate(0deg);
+            }
+        }
+
+        .vortex-spin-cw {
+            animation: fast-spin-cw 20s linear infinite;
+            transform-origin: center;
+        }
+
+        .vortex-spin-ccw {
+            animation: fast-spin-ccw 15s linear infinite;
+            transform-origin: center;
+        }
+
+        @keyframes boss-intense {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1);
+                filter: drop-shadow(0 0 15px rgba(100, 200, 255, 0.6));
+            }
+
+            50% {
+                transform: translateY(-20px) scale(1.05);
+                filter: drop-shadow(0 0 30px rgba(100, 200, 255, 0.9)) brightness(1.2);
+            }
+        }
+
+        .boss-idle {
+            animation: boss-intense 3s ease-in-out infinite;
+        }
+
+        @keyframes boss-die-spin {
+            0% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(720deg);
+            }
+        }
+
+        .boss-die {
+            animation: boss-die-spin 1.5s forwards ease-in;
+            pointer-events: none;
+        }
+
+        @keyframes slide-left {
+            from {
+                transform: translateX(100%);
+            }
+
+            to {
+                transform: translateX(-100%);
+            }
+        }
+
+        .animate-slide-left {
+            animation: slide-left 0.5s linear infinite;
+        }
+
+        .delay-1 {
+            animation-delay: 0s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.5s;
+        }
+
+        .delay-3 {
+            animation-delay: 1s;
+        }
+
+        .delay-4 {
+            animation-delay: 1.5s;
+        }
+
+        .delay-5 {
+            animation-delay: 2s;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
