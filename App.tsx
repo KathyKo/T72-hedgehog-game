@@ -227,7 +227,7 @@ const App: React.FC = () => {
         {!isAudioInitialized && (<div onClick={initAudio} className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer hover:bg-black/70 transition-colors"><div className="animate-bounce mb-4 text-6xl">👆</div><h1 className="text-4xl text-white font-black font-['Chiron_GoRound_TC'] drop-shadow-lg mb-2">點擊畫面開啟音效</h1></div>)}
 
         {/* START, INTRO, INTER_LEVEL */}
-        {stage === GameStage.START && (<div className="w-full h-full relative bg-cover bg-center bg-no-repeat animate-fade-in" style={{ backgroundImage: `url('${ASSETS.startBg}')` }}><div className="star-layer">{[...Array(50)].map((_, i) => (<div key={i} className="star" style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, width: `${Math.random() * 4 + 2}px`, height: `${Math.random() * 4 + 2}px`, animationDelay: `${Math.random() * 3}s` }} />))}</div><div className="hedgehog-aura absolute pointer-events-none" style={{ left: '14%', top: '35%', width: '38%', aspectRatio: '1/1' }}></div><div className="monster-aura absolute pointer-events-none" style={{ right: '5%', top: '5%', width: '45%', aspectRatio: '1/1' }}></div><div className="absolute bottom-[10%] left-0 w-full flex justify-center z-50"><button onClick={handleStart} className="hotspot-btn w-[380px] h-[90px] md:w-[550px] md:h-[130px] rounded-full transition-colors" title="點擊開始遊戲"></button></div></div>)}
+        {stage === GameStage.START && (<div className="w-full h-full relative bg-cover bg-center bg-no-repeat animate-fade-in" style={{ backgroundImage: `url('${ASSETS.startBg}')` }}><div className="star-layer">{[...Array(50)].map((_, i) => (<div key={i} className="star" style={{ top: `${Math.random() * 100}%`, left: `${Math.random() * 100}%`, width: `${Math.random() * 4 + 2}px`, height: `${Math.random() * 4 + 2}px`, animationDelay: `${Math.random() * 3}s` }} />))}</div><div className="hedgehog-aura absolute pointer-events-none" style={{ left: '14%', top: '35%', width: '38%', aspectRatio: '1/1' }}></div><div className="monster-aura absolute pointer-events-none" style={{ right: '5%', top: '5%', width: '45%', aspectRatio: '1/1' }}></div><div className="absolute bottom-[20%] left-0 w-full flex justify-center z-50"><button onClick={handleStart} className="hotspot-btn w-[380px] h-[90px] md:w-[550px] md:h-[130px] rounded-full transition-colors" title="點擊開始遊戲"></button></div></div>)}
         {stage === GameStage.INTRO && (<div className="w-full h-full relative flex items-end justify-center bg-black/60 backdrop-blur-md animate-fade-in" onClick={handleNextStory}><div className="absolute inset-0 -z-10 bg-cover bg-center blur-sm opacity-50" style={{ backgroundImage: `url('${ASSETS.introBg}')` }}></div><div className="absolute bottom-[15%] z-10 animate-float"><img src={STORY_SCRIPT[storyIndex].image} alt="Speaker" className="w-64 md:w-96 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]" /></div><div className="w-full max-w-4xl mb-12 md:mb-20 mx-4 z-20 cursor-pointer group"><div className="bg-white/95 rounded-[2rem] border-8 border-blue-500 p-8 shadow-2xl relative min-h-[180px] flex flex-col justify-center"><div className="absolute -top-6 left-10 bg-yellow-400 text-blue-900 font-black px-6 py-2 rounded-full border-4 border-white shadow-md text-xl">{STORY_SCRIPT[storyIndex].speaker}</div><p className="text-2xl md:text-3xl font-bold text-gray-800 leading-relaxed whitespace-pre-line">{STORY_SCRIPT[storyIndex].text}</p><div className="absolute bottom-4 right-6 text-blue-500 animate-bounce"><svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></div></div><p className="text-center text-white/50 mt-4 text-lg font-bold tracking-widest">點擊繼續...</p></div></div>)}
         {stage === GameStage.INTER_LEVEL && (<div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden"><div className="absolute inset-0 opacity-20">{[...Array(20)].map((_, i) => (<div key={i} className="absolute h-1 bg-blue-400 w-full animate-slide-left" style={{ top: `${Math.random() * 100}%`, animationDuration: `${0.5 + Math.random()}s` }}></div>))}</div><div className="relative z-10 animate-bounce"><img src={ASSETS.hedgehogGo} alt="Running" className="w-48 h-48 object-contain" /></div><h2 className="text-white text-4xl font-black mt-8 animate-pulse tracking-widest font-['Chiron_GoRound_TC']">前往下一世界...</h2></div>)}
 
@@ -235,7 +235,7 @@ const App: React.FC = () => {
         {currentLevel && (
           <div className="w-full h-full relative overflow-hidden mario-transition" style={{ backgroundImage: getBackgroundImage(), backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: getBackgroundColor() }}>
             <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-              {stage !== GameStage.LEVEL_4 && (<div className="absolute bottom-[15%] left-[5%] w-[30%] hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>)}
+              {stage !== GameStage.LEVEL_4 && (<div className="absolute bottom-[25%] left-[2%] w-[36%] hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>)}
 
               {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-90 drop-shadow-lg" /></div><div className={`absolute top-[20%] right-[35%] w-[20%] enemy-float delay-2 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-80" /></div><div className={`absolute top-[10%] right-[30%] w-[8%] enemy-float delay-3 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-70" /></div><div className={`absolute bottom-[15%] right-[3%] w-[8%] enemy-float delay-4 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-60" /></div><div className={`absolute top-[5%] right-[50%] w-[5%] enemy-float delay-5 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-50" /></div></div>)}
               {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute bottom-[10%] right-[1%] w-[45%] enemy-grind delay-1 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain drop-shadow-xl" /></div><div className={`absolute bottom-[30%] right-[40%] w-[25%] enemy-grind delay-2 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.15s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain" /></div><div className={`absolute bottom-[5%] right-[45%] w-[18%] enemy-grind delay-3 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.25s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain blur-[1px]" /></div><div className={`absolute top-[40%] right-[3%] w-[15%] enemy-grind delay-4 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain opacity-80 blur-[2px]" /></div></div>)}
@@ -287,22 +287,46 @@ const App: React.FC = () => {
         {stage === GameStage.VICTORY && (
           <div className="relative w-full h-full text-center animate-pop-in p-6 z-30 bg-cover bg-center" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
             <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
-            <div className="absolute inset-x-0 bottom-0 p-8 pb-12 flex flex-col items-center justify-center gap-6 z-10">
-              <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 shadow-2xl mb-2 w-[400px] h-[180px] flex flex-col justify-center items-center mx-auto relative">
-                <p className="text-3xl font-black text-gray-800 mb-6 leading-normal">
-                  請拍攝此畫面，購買"天絲PLUS雲柔被1件"，結帳時出示此畫面<br />
-                  <span className="text-blue-600 text-4xl">加贈"限量版小童枕1個"</span>
+
+            {/* 內容容器 */}
+            <div className="absolute inset-x-0 bottom-0 p-4 pb-12 flex flex-col items-center justify-center gap-4 z-10">
+
+              {/* 👇 白色優惠框：修改重點在這裡 */}
+              <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 shadow-2xl mb-2 
+                              w-[95%] md:w-[650px]       /* 寬度：手機版95%，電腦版加大到650px */
+                              h-auto                     /* 高度：自動長高，不再鎖死 */
+                              p-6 md:p-8                 /* 內距：給文字一點呼吸空間 */
+                              flex flex-col justify-center items-center mx-auto relative">
+
+                {/* 第一段：引導文字 (字體稍微縮小一點，用 text-xl ~ 2xl) */}
+                <p className="text-xl md:text-2xl font-black text-gray-800 mb-4 leading-relaxed">
+                  請拍攝此畫面<br />
+                  購買 <span className="text-blue-600">"天絲PLUS雲柔被1件"</span><br />
+                  結帳時出示此畫面
                 </p>
-                <p className="text-gray-500 font-bold">(限時優惠，請把握機會！)</p>
+
+                {/* 第二段：贈品重點 (字體最大，紅色或藍色強調) */}
+                <p className="text-red-500 text-3xl md:text-4xl font-black mb-4 animate-pulse">
+                  加贈 "限量版小童枕1個"
+                </p>
+
+                {/* 第三段：限時優惠 (字體加大，顏色加深，margin-bottom 加大以免被擋住) */}
+                <p className="text-gray-600 font-bold text-lg">
+                  (限時優惠，請把握機會！)
+                </p>
               </div>
-              <div className="bg-black/60 text-white px-6 py-2 rounded-full text-lg font-bold border border-white/30 tracking-wider">
+
+              {/* 倒數計時提示 */}
+              <div className="bg-black/60 text-white px-6 py-2 rounded-full text-lg font-bold border border-white/30 tracking-wider shadow-lg">
                 畫面將在 {timeLeft} 秒後關閉
               </div>
-              <div className="flex gap-6 justify-center">
-                <button className="bg-blue-600 cursor-default text-white px-10 py-4 rounded-full text-2xl font-black shadow-lg opacity-90">
+
+              {/* 按鈕區 */}
+              <div className="flex gap-4 md:gap-6 justify-center w-full">
+                <button className="bg-blue-600 cursor-default text-white px-6 py-3 md:px-10 md:py-4 rounded-full text-xl md:text-2xl font-black shadow-lg opacity-90 whitespace-nowrap">
                   前往購買
                 </button>
-                <button onClick={resetGame} className="bg-white text-gray-600 border-4 border-gray-200 px-10 py-4 rounded-full text-2xl font-black hover:bg-gray-50 transition-colors">
+                <button onClick={resetGame} className="bg-white text-gray-600 border-4 border-gray-200 px-6 py-3 md:px-10 md:py-4 rounded-full text-xl md:text-2xl font-black hover:bg-gray-50 transition-colors whitespace-nowrap">
                   回到首頁
                 </button>
               </div>
