@@ -1,6 +1,8 @@
 import { GameStage, QuizLevelData } from './types';
 
-const BASE_PATH = '/T72-hedgehog-game';
+const BASE_PATH = import.meta.env.MODE === 'production'
+  ? '/T72-hedgehog-game'
+  : '';
 
 export const LEVELS: QuizLevelData[] = [
   {
@@ -36,7 +38,7 @@ export const LEVELS: QuizLevelData[] = [
       { text: "1/2 斜紋 + 增加交織點", isCorrect: true }
     ],
     rewardItem: 'shinyShield',
-    rewardName: '閃耀結構盾 (1/2斜紋)',
+    rewardName: '閃耀結構盾 (交織點)',
     nextStage: GameStage.LEVEL_4
   },
   {
@@ -54,13 +56,11 @@ export const LEVELS: QuizLevelData[] = [
 ];
 
 export const ASSETS = {
-  // 道具 Icons
   blueCrystal: `${BASE_PATH}/blue-crystal-icon.png`,
   goldenRope: `${BASE_PATH}/golden-rope.png`,
   shinyShield: `${BASE_PATH}/shiny-shield.png`,
   certificate: `${BASE_PATH}/everlasting-cape.png`,
 
-  // 背景圖 
   startBg: `${BASE_PATH}/start-bg.png`,
   introBg: `${BASE_PATH}/intro-bg.png`,
   summaryBg: `${BASE_PATH}/summary-bg.jpg`,
@@ -70,7 +70,6 @@ export const ASSETS = {
   level4Bg: `${BASE_PATH}/level4-bg.png`,
   endBg: `${BASE_PATH}/end.png`,
 
-  // 角色
   hedgehogHappy: `${BASE_PATH}/hedgehog-happy.png`,
   hedgehogCry: `${BASE_PATH}/hedgehog-sad.png`,
   hedgehogWorried: `${BASE_PATH}/hedgehog-worried.png`,
@@ -78,7 +77,6 @@ export const ASSETS = {
   hedgehogBattle: `${BASE_PATH}/hedgehog-battle.png`,
   hedgehogEnd: `${BASE_PATH}/hedgehog-end.png`,
 
-  // 敵人與其他
   monster: `${BASE_PATH}/water-monster.png`,
   finalBoss: `${BASE_PATH}/final-boss.png`,
   cloud: `${BASE_PATH}/cloud.png`,
