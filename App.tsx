@@ -178,7 +178,7 @@ const App: React.FC = () => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (stage === GameStage.VICTORY) {
-      setTimeLeft(40);
+      setTimeLeft(50);
       timer = setInterval(() => {
         setTimeLeft(prev => {
           if (prev <= 1) return 0;
@@ -259,10 +259,7 @@ const App: React.FC = () => {
       {currentLevel && (
         <div className="w-full h-full relative overflow-hidden mario-transition" style={{ backgroundImage: getBackgroundImage(), backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: getBackgroundColor() }}>
           <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-
-            {/* 👇 控制 Level 1-3 刺蝟的位置與大小 */}
             {stage !== GameStage.LEVEL_4 && (<div className="absolute bottom-[24%] left-[1%] w-[35%] hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>)}
-
             {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-90 drop-shadow-lg" /></div><div className={`absolute top-[20%] right-[35%] w-[20%] enemy-float delay-2 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-80" /></div><div className={`absolute top-[10%] right-[30%] w-[8%] enemy-float delay-3 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-70" /></div><div className={`absolute bottom-[15%] right-[3%] w-[8%] enemy-float delay-4 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-60" /></div><div className={`absolute top-[5%] right-[50%] w-[5%] enemy-float delay-5 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-50" /></div></div>)}
             {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute bottom-[18%] right-[1%] w-[45%] enemy-grind delay-1 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain drop-shadow-xl" /></div><div className={`absolute bottom-[30%] right-[40%] w-[25%] enemy-grind delay-2 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.15s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain" /></div><div className={`absolute bottom-[5%] right-[45%] w-[18%] enemy-grind delay-3 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.25s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain blur-[1px]" /></div><div className={`absolute top-[40%] right-[3%] w-[15%] enemy-grind delay-4 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain opacity-80 blur-[2px]" /></div></div>)}
             {stage === GameStage.LEVEL_3 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[15%] w-[35%] enemy-aggressive delay-1 ${showReward ? 'monster-implode' : ''}`}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain drop-shadow-2xl" /></div><div className={`absolute bottom-[40%] right-[50%] w-[15%] enemy-aggressive delay-2 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.1s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain" /></div><div className={`absolute top-[10%] right-[45%] w-[12%] enemy-aggressive delay-3 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.12s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain blur-[1px]" /></div><div className={`absolute bottom-[5%] right-[5%] w-[20%] enemy-aggressive delay-4 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.18s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain opacity-80" /></div></div>)}
@@ -271,8 +268,6 @@ const App: React.FC = () => {
               <div className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${showReward ? 'opacity-0' : 'opacity-100'}`}>
                 <div className="absolute inset-0 z-0 flex items-center justify-center opacity-70 pointer-events-none mix-blend-screen"><svg className="w-[180%] h-[180%]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g className="vortex-spin-cw"><circle cx="250" cy="250" r="100" fill="none" stroke="white" strokeWidth="2" strokeDasharray="30 20" opacity="0.6" /><circle cx="250" cy="250" r="180" fill="none" stroke="white" strokeWidth="1" strokeDasharray="50 50" opacity="0.4" /></g><g className="vortex-spin-ccw"><circle cx="250" cy="250" r="140" fill="none" stroke="white" strokeWidth="3" strokeDasharray="20 40" opacity="0.8" /><circle cx="250" cy="250" r="220" fill="none" stroke="white" strokeWidth="1" strokeDasharray="10 30" opacity="0.3" /></g></svg></div>
                 <div className={`absolute top-[5%] left-[40%] w-[80%] md:w-[74%] z-10 boss-idle ${showReward ? 'boss-die' : ''}`}><img src={ASSETS.finalBoss} alt="Final Boss" className="w-full object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.5)]" /></div>
-
-                {/* 👇 控制 Level 4 刺蝟的位置與大小 */}
                 <div className="absolute bottom-[24%] left-[1%] w-[35%] z-20 hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>
               </div>
             )}
@@ -330,23 +325,17 @@ const App: React.FC = () => {
       {/* VICTORY (底部浮動卡片 - 高度壓縮版) */}
       {stage === GameStage.VICTORY && (
         <div className="relative w-full h-full bg-cover bg-[center_top]" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
-
-          {/* 👇 修改: bottom-2 (更貼底), p-3 md:p-5 (減少內距), border-4 md:border-8 (手機邊框變細) */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[95%] md:w-[700px] z-50">
             <div className="bg-white/95 backdrop-blur-md border-4 md:border-8 border-yellow-400 p-3 md:p-5 rounded-[2rem] shadow-2xl flex flex-col items-center gap-2 w-full">
               <div className="w-full flex flex-col gap-2">
                 <div className="text-center">
-                  {/* 字體縮小一號 */}
                   <p className="text-base md:text-xl font-black text-gray-800 leading-tight mb-1">請拍攝此畫面，購買 <span className="text-blue-600">天絲PLUS雲柔被1件</span></p>
-                  <p className="text-xl md:text-3xl text-red-500 font-black animate-pulse my-0">加贈 "限量版小童枕1個"</p>
-                  {/* 移除了一行提示文字以節省空間 */}
+                  <p className="text-xl md:text-3xl text-red-500 font-black animate-pulse my-0">結帳時出示，加贈 "限量版小童枕1個"</p>
                 </div>
 
-                {/* 底部按鈕列變緊湊: p-2 gap-2 */}
                 <div className="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-2 rounded-xl gap-2">
                   <span className="font-bold text-gray-600 text-base md:text-lg truncate">畫面將在 {timeLeft} 秒後關閉</span>
                   <div className="flex gap-2 w-full md:w-auto shrink-0">
-                    {/* 按鈕變矮: px-4 py-1 */}
                     <button className="bg-blue-600 text-white px-4 py-1 rounded-lg font-bold shadow flex-1 md:flex-none text-base md:text-lg whitespace-nowrap">前往購買</button>
                     <button onClick={resetGame} className="bg-white text-gray-600 border-2 border-gray-300 px-4 py-1 rounded-lg font-bold flex-1 md:flex-none text-base md:text-lg whitespace-nowrap">回到首頁</button>
                   </div>
