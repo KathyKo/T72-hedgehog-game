@@ -181,7 +181,9 @@ const App: React.FC = () => {
       setTimeLeft(40);
       timer = setInterval(() => {
         setTimeLeft(prev => {
-          if (prev <= 1) return 0;
+          if (prev <= 1) {
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -189,7 +191,7 @@ const App: React.FC = () => {
     return () => clearInterval(timer);
   }, [stage]);
 
-  // 監聽倒數歸零
+  // 監聽倒數歸零，執行跳轉
   useEffect(() => {
     if (stage === GameStage.VICTORY && timeLeft === 0) {
       resetGame();
@@ -212,7 +214,6 @@ const App: React.FC = () => {
     return '#060b28';
   };
 
-  // Loading 畫面
   if (isLoading) {
     return (
       <div className="w-screen h-[100dvh] bg-[#060b28] flex flex-col items-center justify-center text-white">
@@ -312,10 +313,10 @@ const App: React.FC = () => {
               <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-50 rounded-full animate-pulse"></div>
               <img src={ASSETS.hedgehogEnd} alt="Cici Sleeping" className="w-72 md:w-96 relative z-10 hero-float-animation" />
             </div>
-            {/* 👇 修改 2: 縮減 Summary 框框大小 */}
-            <div className="bg-white/95 rounded-[2.5rem] border-8 border-yellow-400 p-5 md:p-8 shadow-2xl text-center relative w-full">
-              <h2 className="text-4xl md:text-5xl font-black text-blue-900 mb-4 font-['ZCOOL_KuaiLe']">天絲 Plus+ 的秘密</h2>
-              <p className="text-xl md:text-2xl text-gray-700 font-bold leading-relaxed mb-6 text-left md:text-center px-4">使用 Micro LF 級天絲纖維，透過特殊工藝處理，<br className="hidden md:block" />有效降低原纖化現象，即使多次洗滌也能<br className="hidden md:block" /><span className="text-yellow-600 font-black text-3xl">防止起毛球</span>，維持光澤與柔軟觸感！</p>
+            {/* 👇 修改: 縮減 Summary 寬度 (max-w-3xl) 與內距 (p-6 md:p-8) */}
+            <div className="bg-white/95 rounded-[3rem] border-8 border-yellow-400 p-6 md:p-8 shadow-2xl text-center relative w-full max-w-3xl">
+              <h2 className="text-4xl md:text-5xl font-black text-blue-900 mb-6 font-['ZCOOL_KuaiLe']">天絲 Plus+ 的秘密</h2>
+              <p className="text-xl md:text-2xl text-gray-700 font-bold leading-relaxed mb-8 text-left md:text-center px-4">使用 Micro LF 級天絲纖維，透過特殊工藝處理，<br className="hidden md:block" />有效降低原纖化現象，即使多次洗滌也能<br className="hidden md:block" /><span className="text-yellow-600 font-black text-3xl">防止起毛球</span>，維持光澤與柔軟觸感！</p>
               <button onClick={handleSummaryNext} className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 text-white px-16 py-5 rounded-full text-3xl font-black shadow-lg hover:scale-105 transition-transform active:scale-95">下一頁 ➔</button>
             </div>
           </div>
@@ -325,29 +326,26 @@ const App: React.FC = () => {
       {/* ENDING */}
       {stage === GameStage.ENDING && (<div className="w-full h-full bg-black flex items-center justify-center"><video src={`${BASE_PATH}/ending.mp4`} autoPlay playsInline onEnded={handleVideoEnded} className="w-full h-full object-contain md:object-cover" /></div>)}
 
-      {/* VICTORY (改為浮動式小卡) */}
+      {/* VICTORY (底部浮動卡片) */}
       {stage === GameStage.VICTORY && (
-        <div className="relative w-full h-full text-center animate-pop-in p-6 z-30 bg-cover bg-[center_top]" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
-          <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]"></div>
+        <div className="relative w-full h-full bg-cover bg-[center_top]" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
 
-          {/* 👇 修改 3: 底部卡片改為浮動，限制寬度 w-[95%] md:w-[650px] 並置中 */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[95%] md:w-[650px] bg-white/95 backdrop-blur-md rounded-[2.5rem] border-8 border-yellow-400 p-5 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.5)] flex flex-col items-center gap-4 z-50">
-            <div className="w-full flex flex-col gap-4">
-              <div className="text-center">
-                <p className="text-lg md:text-2xl font-black text-gray-800 leading-tight mb-2">
-                  請拍攝此畫面，購買 <span className="text-blue-600">"天絲PLUS雲柔被1件"</span>，結帳出示畫面
-                </p>
-                <p className="text-red-500 text-2xl md:text-4xl font-black animate-pulse">
-                  加贈 "限量版小童枕1個"
-                </p>
-                <p className="text-gray-500 text-xs md:text-sm font-bold mt-2">(限時優惠，請把握機會！)</p>
-              </div>
+          {/* 👇 修改：底部固定，但左右留空 (w-[95%] md:w-[700px])，看起來像浮動的卡片 */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-[95%] md:w-[700px] z-50">
+            <div className="bg-white/95 backdrop-blur-md border-8 border-yellow-400 p-4 md:p-6 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-2 w-full">
+              <div className="w-full flex flex-col gap-4">
+                <div className="text-center">
+                  <p className="text-lg md:text-2xl font-black text-gray-800 leading-tight mb-2">請拍攝此畫面，購買 <span className="text-blue-600">天絲PLUS雲柔被1件</span></p>
+                  <p className="text-2xl md:text-4xl text-red-500 font-black animate-pulse my-1">加贈 "限量版小童枕1個"</p>
+                  <p className="text-xs md:text-sm text-gray-500 font-bold">(限時優惠，請把握機會！)</p>
+                </div>
 
-              <div className="flex flex-col md:flex-row justify-between items-center bg-gray-100 p-3 rounded-xl gap-3">
-                <span className="font-bold text-gray-600">畫面將在 {timeLeft} 秒後關閉</span>
-                <div className="flex gap-2 w-full md:w-auto">
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold shadow flex-1 md:flex-none">前往購買</button>
-                  <button onClick={resetGame} className="bg-white text-gray-600 border border-gray-300 px-4 py-2 rounded-lg font-bold flex-1 md:flex-none">回到首頁</button>
+                <div className="flex flex-col md:flex-row justify-between items-center bg-gray-100 p-3 rounded-2xl gap-3">
+                  <span className="font-bold text-gray-600 text-lg">畫面將在 {timeLeft} 秒後關閉</span>
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <button className="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold shadow flex-1 md:flex-none text-lg">前往購買</button>
+                    <button onClick={resetGame} className="bg-white text-gray-600 border-2 border-gray-300 px-6 py-2 rounded-xl font-bold flex-1 md:flex-none text-lg">回到首頁</button>
+                  </div>
                 </div>
               </div>
             </div>
