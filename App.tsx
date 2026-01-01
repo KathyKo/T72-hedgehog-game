@@ -34,7 +34,7 @@ const App: React.FC = () => {
   const currentLevelIndex = LEVELS.findIndex(l => l.id === stage);
   const currentLevel = LEVELS[currentLevelIndex];
 
-  // 圖片預加載
+  // 資源預載
   useEffect(() => {
     const imagesToLoad = Object.values(ASSETS);
     let loadedCount = 0;
@@ -54,7 +54,7 @@ const App: React.FC = () => {
     })).then(() => setIsLoading(false));
   }, []);
 
-  // 音效播放
+  // 音效系統
   const playSound = (type: 'correct' | 'wrong' | 'victory' | 'click' | 'boss-defeat') => {
     if (!isAudioInitialized) return;
     let audioPath = '';
@@ -82,7 +82,6 @@ const App: React.FC = () => {
     bgmRef.current.play().catch(e => console.error("Audio unlock failed:", e));
   };
 
-  // BGM 控制
   useEffect(() => {
     if (!isAudioInitialized) return;
     let targetBgm = '';
@@ -116,6 +115,7 @@ const App: React.FC = () => {
     }
   }, [stage, isAudioInitialized]);
 
+  // 遊戲邏輯控制
   const handleStart = () => { setStage(GameStage.INTRO); setStoryIndex(0); };
   const handleNextStory = () => { playSound('click'); if (storyIndex < STORY_SCRIPT.length - 1) { setStoryIndex(prev => prev + 1); } else { setStage(GameStage.LEVEL_1); } };
 
@@ -160,24 +160,24 @@ const App: React.FC = () => {
 
   useEffect(() => { if (stage === GameStage.INTER_LEVEL && pendingStage) { const timer = setTimeout(() => { setStage(pendingStage); setPendingStage(null); }, 3000); return () => clearTimeout(timer); } }, [stage, pendingStage]);
 
-  // 👇 修正倒數計時邏輯 (解決黑屏問題)
+  // 🔥 修正：倒數計時邏輯 (確保歸零時跳轉)
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let intervalId: NodeJS.Timeout;
     if (stage === GameStage.VICTORY) {
-      setTimeLeft(40);
-      timer = setInterval(() => {
-        setTimeLeft(prev => (prev > 0 ? prev - 1 : 0));
+      setTimeLeft(33); // 初始時間
+      intervalId = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(intervalId);
+            resetGame(); // 🔥 強制觸發重置
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
-    return () => clearInterval(timer);
+    return () => clearInterval(intervalId);
   }, [stage]);
-
-  // 獨立監聽 timeLeft，歸零時觸發重置
-  useEffect(() => {
-    if (stage === GameStage.VICTORY && timeLeft === 0) {
-      resetGame();
-    }
-  }, [timeLeft, stage]);
 
   const getBackgroundImage = () => {
     if (stage === GameStage.LEVEL_1) return `url('${ASSETS.level1Bg}')`;
@@ -219,43 +219,45 @@ const App: React.FC = () => {
         {stage === GameStage.INTRO && (<div className="w-full h-full relative flex items-end justify-center bg-black/60 backdrop-blur-md animate-fade-in" onClick={handleNextStory}><div className="absolute inset-0 -z-10 bg-cover bg-center blur-sm opacity-50" style={{ backgroundImage: `url('${ASSETS.introBg}')` }}></div><div className="absolute bottom-[20%] z-10 animate-float"><img src={STORY_SCRIPT[storyIndex].image} alt="Speaker" className="w-64 md:w-96 drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]" /></div><div className="w-full max-w-4xl mb-12 md:mb-20 mx-4 z-20 cursor-pointer group"><div className="bg-white/95 rounded-[2rem] border-8 border-blue-500 p-8 shadow-2xl relative min-h-[180px] flex flex-col justify-center"><div className="absolute -top-6 left-10 bg-yellow-400 text-blue-900 font-black px-6 py-2 rounded-full border-4 border-white shadow-md text-xl">{STORY_SCRIPT[storyIndex].speaker}</div><p className="text-2xl md:text-3xl font-bold text-gray-800 leading-relaxed whitespace-pre-line">{STORY_SCRIPT[storyIndex].text}</p><div className="absolute bottom-4 right-6 text-blue-500 animate-bounce"><svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg></div></div><p className="text-center text-white/50 mt-4 text-lg font-bold tracking-widest">點擊繼續...</p></div></div>)}
         {stage === GameStage.INTER_LEVEL && (<div className="w-full h-full flex flex-col items-center justify-center bg-black relative overflow-hidden"><div className="absolute inset-0 opacity-20">{[...Array(20)].map((_, i) => (<div key={i} className="absolute h-1 bg-blue-400 w-full animate-slide-left" style={{ top: `${Math.random() * 100}%`, animationDuration: `${0.5 + Math.random()}s` }}></div>))}</div><div className="relative z-10 animate-bounce"><img src={ASSETS.hedgehogGo} alt="Running" className="w-48 h-48 object-contain" /></div><h2 className="text-white text-4xl font-black mt-8 animate-pulse tracking-widest font-['Chiron_GoRound_TC']">前往下一世界...</h2></div>)}
 
-        {/* 遊戲關卡 */}
+        {/* 遊戲關卡 (LEVEL 1-4) - 🔥 修正：使用絕對比例分層，確保不擋住 */}
         {currentLevel && (
           <div className="w-full h-full relative overflow-hidden mario-transition" style={{ backgroundImage: getBackgroundImage(), backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: getBackgroundColor() }}>
-            <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-              {/* 刺蝟位置：確保與底部保持 25% 距離，不被對話框擋住 */}
-              {stage !== GameStage.LEVEL_4 && (<div className="absolute bottom-[25%] left-[2%] w-[35%] md:w-[30%] hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>)}
+            {/* 上半部 (60%)：專門放動畫和角色，絕對安全區 */}
+            <div className="absolute top-0 left-0 w-full h-[60%] pointer-events-none z-0">
+              {stage !== GameStage.LEVEL_4 && (
+                <div className="absolute bottom-[5%] left-[2%] w-[35%] md:w-[30%] hero-float-animation">
+                  <img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" />
+                </div>
+              )}
 
-              {/* 怪物位置保持不變 */}
-              {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-90 drop-shadow-lg" /></div><div className={`absolute top-[20%] right-[35%] w-[20%] enemy-float delay-2 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-80" /></div><div className={`absolute top-[10%] right-[30%] w-[8%] enemy-float delay-3 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-70" /></div><div className={`absolute bottom-[15%] right-[3%] w-[8%] enemy-float delay-4 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-60" /></div><div className={`absolute top-[5%] right-[50%] w-[5%] enemy-float delay-5 ${showReward ? 'monster-die' : ''}`}><img src={`${BASE_PATH}/water-monster.png`} alt="Enemy" className="w-full object-contain opacity-50" /></div></div>)}
-              {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute bottom-[10%] right-[1%] w-[45%] enemy-grind delay-1 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain drop-shadow-xl" /></div><div className={`absolute bottom-[30%] right-[40%] w-[25%] enemy-grind delay-2 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.15s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain" /></div><div className={`absolute bottom-[5%] right-[45%] w-[18%] enemy-grind delay-3 ${showReward ? 'monster-sink' : ''}`} style={{ animationDuration: '0.25s' }}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain blur-[1px]" /></div><div className={`absolute top-[40%] right-[3%] w-[15%] enemy-grind delay-4 ${showReward ? 'monster-sink' : ''}`}><img src={`${BASE_PATH}/sandpaper-monster.png`} alt="Sandpaper" className="w-full object-contain opacity-80 blur-[2px]" /></div></div>)}
-              {stage === GameStage.LEVEL_3 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'pointer-events-none' : ''}`}><div className={`absolute top-[10%] right-[15%] w-[35%] enemy-aggressive delay-1 ${showReward ? 'monster-implode' : ''}`}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain drop-shadow-2xl" /></div><div className={`absolute bottom-[40%] right-[50%] w-[15%] enemy-aggressive delay-2 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.1s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain" /></div><div className={`absolute top-[10%] right-[45%] w-[12%] enemy-aggressive delay-3 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.12s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain blur-[1px]" /></div><div className={`absolute bottom-[5%] right-[5%] w-[20%] enemy-aggressive delay-4 ${showReward ? 'monster-implode' : ''}`} style={{ animationDuration: '0.18s' }}><img src={`${BASE_PATH}/glitch-monster.png`} alt="Glitch" className="w-full object-contain opacity-80" /></div></div>)}
+              {/* 怪物層 */}
+              {stage === GameStage.LEVEL_1 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'opacity-0' : ''}`}><div className="absolute top-[10%] right-[3%] w-[35%] enemy-float delay-1"><img src={`${BASE_PATH}/water-monster.png`} className="w-full object-contain drop-shadow-lg" /></div><div className="absolute top-[30%] right-[40%] w-[20%] enemy-float delay-2"><img src={`${BASE_PATH}/water-monster.png`} className="w-full object-contain opacity-80" /></div></div>)}
+              {stage === GameStage.LEVEL_2 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'opacity-0' : ''}`}><div className="absolute bottom-[5%] right-[2%] w-[40%] enemy-grind delay-1"><img src={`${BASE_PATH}/sandpaper-monster.png`} className="w-full object-contain drop-shadow-xl" /></div><div className="absolute top-[10%] right-[45%] w-[25%] enemy-grind delay-2"><img src={`${BASE_PATH}/sandpaper-monster.png`} className="w-full object-contain" /></div></div>)}
+              {stage === GameStage.LEVEL_3 && (<div className={`absolute inset-0 transition-opacity duration-500 ${showReward ? 'opacity-0' : ''}`}><div className="absolute top-[5%] right-[15%] w-[35%] enemy-aggressive delay-1"><img src={`${BASE_PATH}/glitch-monster.png`} className="w-full object-contain drop-shadow-2xl" /></div><div className="absolute bottom-[10%] right-[50%] w-[20%] enemy-aggressive delay-2"><img src={`${BASE_PATH}/glitch-monster.png`} className="w-full object-contain" /></div></div>)}
 
-              {/* Level 4 刺蝟修正：大小與位置同步 */}
               {stage === GameStage.LEVEL_4 && (
                 <div className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ${showReward ? 'opacity-0' : 'opacity-100'}`}>
-                  <div className="absolute inset-0 z-0 flex items-center justify-center opacity-70 pointer-events-none mix-blend-screen"><svg className="w-[180%] h-[180%]" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg"><g className="vortex-spin-cw"><circle cx="250" cy="250" r="100" fill="none" stroke="white" strokeWidth="2" strokeDasharray="30 20" opacity="0.6" /><circle cx="250" cy="250" r="180" fill="none" stroke="white" strokeWidth="1" strokeDasharray="50 50" opacity="0.4" /></g><g className="vortex-spin-ccw"><circle cx="250" cy="250" r="140" fill="none" stroke="white" strokeWidth="3" strokeDasharray="20 40" opacity="0.8" /><circle cx="250" cy="250" r="220" fill="none" stroke="white" strokeWidth="1" strokeDasharray="10 30" opacity="0.3" /></g></svg></div>
-                  <div className={`absolute top-[5%] left-[40%] w-[80%] md:w-[74%] z-10 boss-idle ${showReward ? 'boss-die' : ''}`}><img src={ASSETS.finalBoss} alt="Final Boss" className="w-full object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.5)]" /></div>
-                  <div className="absolute bottom-[25%] left-[2%] w-[35%] md:w-[30%] z-20 hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>
+                  <div className="absolute top-[5%] left-[40%] w-[55%] z-10 boss-idle"><img src={ASSETS.finalBoss} alt="Final Boss" className="w-full object-contain drop-shadow-[0_0_50px_rgba(255,255,255,0.5)]" /></div>
+                  <div className="absolute bottom-[5%] left-[2%] w-[35%] z-20 hero-float-animation"><img src={ASSETS.hedgehogBattle} alt="Hero" className="w-full object-contain drop-shadow-2xl" /></div>
                 </div>
               )}
             </div>
 
-            {/* 👇 遊戲問題框修正：大幅減少內距 (p-4)，強制貼底，字體縮小 */}
+            {/* 下半部 (40%)：專門放對話框，強制貼底 */}
             {!showReward && (
-              <div className="relative z-30 w-full h-full flex flex-col items-center justify-end pb-4 md:pb-12">
-                <div className="bg-white/95 backdrop-blur-md rounded-[2rem] p-4 md:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.6)] border-[6px] border-blue-200 max-w-4xl w-[95%] md:w-[80%] animate-pop-in">
-                  <div className="flex items-center gap-2 md:gap-4 mb-2 md:mb-6">
-                    <span className="bg-yellow-400 text-blue-900 px-3 py-1 md:px-6 md:py-2 rounded-full font-black text-sm md:text-xl shadow-md border-2 border-white whitespace-nowrap">LEVEL {currentLevelIndex + 1}</span>
-                    <span className="text-blue-900 font-bold text-lg md:text-2xl truncate">{currentLevel.context}</span>
+              <div className="absolute bottom-0 left-0 w-full h-[40%] flex flex-col items-center justify-end pb-4 md:pb-8 z-30">
+                <div className="bg-white/95 backdrop-blur-md rounded-[1.5rem] p-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] border-[4px] border-blue-200 w-[95%] md:w-[80%] max-w-4xl animate-pop-in flex flex-col justify-between h-full max-h-[280px]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="bg-yellow-400 text-blue-900 px-3 py-1 rounded-full font-black text-sm md:text-lg shadow-sm border border-white whitespace-nowrap">LEVEL {currentLevelIndex + 1}</span>
+                    <span className="text-blue-900 font-bold text-base md:text-xl truncate">{currentLevel.context}</span>
                   </div>
-                  <h2 className="text-xl md:text-4xl text-gray-800 font-black mb-4 md:mb-10 leading-snug">{currentLevel.question}</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                  <h2 className="text-lg md:text-2xl text-gray-800 font-black mb-2 leading-snug flex-grow flex items-center">{currentLevel.question}</h2>
+                  <div className="grid grid-cols-2 gap-3 h-[80px] md:h-[100px]">
                     {currentLevel.options.map((opt, idx) => (
-                      <button key={idx} onClick={opt.isCorrect ? handleCorrect : handleWrong} className="group relative bg-blue-50 hover:bg-yellow-50 border-4 border-blue-100 hover:border-yellow-400 p-3 md:p-6 rounded-[1rem] md:rounded-[1.5rem] transition-all duration-200 text-left shadow-md hover:shadow-lg active:scale-95">
-                        <div className="flex items-center gap-3 md:gap-4">
-                          <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-500 text-white rounded-full flex shrink-0 items-center justify-center font-black text-base md:text-lg border-2 border-white shadow">{idx === 0 ? 'A' : 'B'}</div>
-                          <span className="text-base md:text-2xl font-black text-gray-700 group-hover:text-gray-900">{opt.text}</span>
+                      <button key={idx} onClick={opt.isCorrect ? handleCorrect : handleWrong} className="relative bg-blue-50 hover:bg-yellow-50 border-2 border-blue-100 hover:border-yellow-400 rounded-xl transition-all active:scale-95 flex items-center px-2">
+                        <div className="flex items-center gap-2 w-full">
+                          <div className="w-6 h-6 md:w-8 md:h-8 bg-blue-500 text-white rounded-full flex shrink-0 items-center justify-center font-black text-sm border border-white shadow">{idx === 0 ? 'A' : 'B'}</div>
+                          <span className="text-sm md:text-lg font-black text-gray-700 leading-tight text-left">{opt.text}</span>
                         </div>
                       </button>
                     ))}
@@ -266,36 +268,39 @@ const App: React.FC = () => {
 
             {showReward && (
               <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
-                <div className="item-get-modal bg-gradient-to-b from-yellow-100 to-white p-8 md:p-12 rounded-[3rem] border-8 border-yellow-400 shadow-[0_0_100px_rgba(250,204,21,0.6)] text-center relative max-w-2xl w-[90%] mx-4">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-yellow-300/20 rounded-full blur-xl ray-bg -z-10"></div>
-                  <h2 className="text-4xl md:text-5xl font-black text-yellow-600 mb-2 font-['ZCOOL_KuaiLe']">{stage === GameStage.LEVEL_4 ? "最終試煉通過！" : "怪物擊破！"}</h2>
-                  <p className="text-xl md:text-2xl text-gray-500 font-bold mb-6 md:mb-8">{stage === GameStage.LEVEL_4 ? "成功守護了睡眠星球！" : "成功守護了布料結構"}</p>
-                  <div className="w-32 h-32 md:w-48 md:h-48 mx-auto mb-6 md:mb-8 relative animate-bounce-slow"><div className="absolute inset-0 bg-yellow-400 rounded-full blur-2xl opacity-50"></div><img src={ASSETS[currentLevel.rewardItem]} alt="Reward" className="w-full h-full object-contain relative z-10" /></div>
-                  <div className="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-4 mb-6 md:mb-8"><p className="text-blue-500 font-black text-xl mb-1">獲得道具</p><p className="text-2xl md:text-3xl font-black text-gray-800">{currentLevel.rewardName}</p></div>
-                  <button onClick={handleRewardContinue} className="w-full py-4 md:py-6 text-2xl md:text-4xl font-black text-white bg-gradient-to-b from-blue-400 to-blue-600 rounded-full border-4 border-white shadow-[0_8px_0_#1e40af] active:translate-y-2 active:shadow-none transition-all">{stage === GameStage.LEVEL_4 ? "成功抵擋毛球 ➔" : "繼續冒險 ➔"}</button>
+                <div className="item-get-modal bg-gradient-to-b from-yellow-100 to-white p-8 rounded-[2rem] border-8 border-yellow-400 shadow-2xl text-center max-w-md w-[90%]">
+                  <h2 className="text-3xl font-black text-yellow-600 mb-2 font-['ZCOOL_KuaiLe']">怪物擊破！</h2>
+                  <p className="text-lg text-gray-500 font-bold mb-4">成功守護了布料結構</p>
+                  <div className="w-32 h-32 mx-auto mb-4 relative animate-bounce-slow"><img src={ASSETS[currentLevel.rewardItem]} alt="Reward" className="w-full h-full object-contain" /></div>
+                  <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 mb-4"><p className="text-blue-500 font-black text-lg">獲得道具</p><p className="text-xl font-black text-gray-800">{currentLevel.rewardName}</p></div>
+                  <button onClick={handleRewardContinue} className="w-full py-3 text-xl font-black text-white bg-gradient-to-b from-blue-400 to-blue-600 rounded-full border-4 border-white shadow-lg active:scale-95">繼續冒險 ➔</button>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* SUMMARY (解說頁) - 回歸垂直置中，縮小內距與 gap */}
+        {/* SUMMARY (解說頁) - 🔥 修正：使用 absolute 定位刺蝟，確保不消失 */}
         {stage === GameStage.SUMMARY && (
           <div className="w-full h-full relative flex flex-col items-center justify-center bg-cover bg-center animate-fade-in" style={{ backgroundImage: `url('${ASSETS.summaryBg}')` }}>
             <div className="absolute inset-0 bg-white/40 backdrop-blur-[3px]"></div>
-            <div className="relative z-10 flex flex-col items-center max-w-4xl w-[90%] p-4">
-              <div className="relative mb-2 md:mb-6">
-                <div className="absolute inset-0 bg-yellow-400 blur-2xl opacity-50 rounded-full animate-pulse"></div>
-                <img src={ASSETS.hedgehogEnd} alt="Cici Sleeping" className="w-40 md:w-80 relative z-10 hero-float-animation" />
+
+            {/* 內容容器 */}
+            <div className="relative z-10 w-[90%] max-w-3xl mt-20"> {/* mt-20 留空間給刺蝟 */}
+
+              {/* 刺蝟：絕對定位在框框上方，像磁鐵一樣吸住 */}
+              <div className="absolute -top-[140px] left-1/2 -translate-x-1/2 w-48 md:w-64 z-20 hero-float-animation">
+                <img src={ASSETS.hedgehogEnd} alt="Cici" className="w-full object-contain drop-shadow-2xl" />
               </div>
-              <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 p-6 md:p-10 shadow-2xl text-center relative w-full">
-                <h2 className="text-3xl md:text-5xl font-black text-blue-900 mb-2 md:mb-6 font-['ZCOOL_KuaiLe']">天絲 Plus+ 的秘密</h2>
-                <p className="text-lg md:text-2xl text-gray-700 font-bold leading-relaxed mb-4 md:mb-8 text-left md:text-center px-2">
+
+              <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 p-6 md:p-10 shadow-2xl text-center relative w-full pt-16">
+                <h2 className="text-3xl md:text-4xl font-black text-blue-900 mb-4 font-['ZCOOL_KuaiLe']">天絲 Plus+ 的秘密</h2>
+                <p className="text-base md:text-xl text-gray-700 font-bold leading-relaxed mb-6 px-2">
                   使用 Micro LF 級天絲纖維，透過特殊工藝處理，<br className="hidden md:block" />
                   有效降低原纖化現象，即使多次洗滌也能<br className="hidden md:block" />
-                  <span className="text-yellow-600 font-black text-2xl md:text-3xl">防止起毛球</span>，維持光澤與柔軟觸感！
+                  <span className="text-yellow-600 font-black text-xl md:text-2xl">防止起毛球</span>，維持光澤與柔軟觸感！
                 </p>
-                <button onClick={handleSummaryNext} className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-3 md:px-16 md:py-5 rounded-full text-2xl md:text-3xl font-black shadow-lg hover:scale-105 transition-transform active:scale-95">下一頁 ➔</button>
+                <button onClick={handleSummaryNext} className="w-full md:w-auto bg-gradient-to-r from-blue-500 to-blue-600 text-white px-10 py-3 rounded-full text-xl md:text-2xl font-black shadow-lg hover:scale-105 active:scale-95">下一頁 ➔</button>
               </div>
             </div>
           </div>
@@ -308,40 +313,32 @@ const App: React.FC = () => {
           </div>
         )}
 
-        {/* === VICTORY (領獎) === 全新設計：底部玻璃資訊條，完全不擋中間 */}
+        {/* === VICTORY (領獎) === */}
         {stage === GameStage.VICTORY && (
           <div className="relative w-full h-full text-center animate-pop-in z-30 bg-cover bg-center" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
-            {/* 背景稍微暗一點，凸顯主角 */}
             <div className="absolute inset-0 bg-black/5"></div>
 
-            {/* 👇 資訊條：固定在最底部，寬度 100%，半透明背景 */}
-            <div className="absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t-8 border-yellow-400 p-4 md:p-6 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] flex flex-col items-center gap-4 z-50">
-
-              <div className="max-w-4xl w-full flex flex-col md:flex-row items-center justify-between gap-4">
-                {/* 左側：優惠文字 */}
+            {/* 底部資訊條 */}
+            <div className="absolute bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t-8 border-yellow-400 p-4 pb-8 shadow-[0_-10px_40px_rgba(0,0,0,0.3)] flex flex-col items-center gap-3 z-50">
+              <div className="max-w-4xl w-full flex flex-col md:flex-row items-center justify-between gap-3">
                 <div className="text-center md:text-left flex-1">
-                  <p className="text-lg md:text-2xl font-black text-gray-800 leading-tight mb-2">
+                  <p className="text-base md:text-xl font-black text-gray-800 leading-tight mb-1">
                     請拍攝此畫面，購買 <span className="text-blue-600">"天絲PLUS雲柔被1件"</span><br />
                     結帳時出示此畫面
                   </p>
-                  <p className="text-red-500 text-2xl md:text-4xl font-black animate-pulse">
+                  <p className="text-red-500 text-xl md:text-3xl font-black animate-pulse">
                     加贈 "限量版小童枕1個"
                   </p>
-                  <p className="text-gray-500 text-sm md:text-base font-bold mt-1">(限時優惠，請把握機會！)</p>
+                  <p className="text-gray-500 text-xs md:text-sm font-bold">(限時優惠，請把握機會！)</p>
                 </div>
 
-                {/* 右側：按鈕與倒數 */}
-                <div className="flex flex-col items-center md:items-end gap-3 shrink-0">
-                  <div className="bg-black/80 text-yellow-400 px-4 py-1 rounded-full text-sm md:text-lg font-bold tracking-wider">
+                <div className="flex flex-col items-center md:items-end gap-2 shrink-0">
+                  <div className="bg-black/80 text-yellow-400 px-4 py-1 rounded-full text-sm font-bold tracking-wider">
                     畫面將在 {timeLeft} 秒後關閉
                   </div>
-                  <div className="flex gap-3">
-                    <button className="bg-blue-600 cursor-default text-white px-6 py-2 md:px-8 md:py-3 rounded-full text-lg md:text-xl font-black shadow-lg whitespace-nowrap">
-                      前往購買
-                    </button>
-                    <button onClick={resetGame} className="bg-gray-100 text-gray-600 border-2 border-gray-300 px-6 py-2 md:px-8 md:py-3 rounded-full text-lg md:text-xl font-black hover:bg-gray-200 transition-colors whitespace-nowrap">
-                      回到首頁
-                    </button>
+                  <div className="flex gap-2">
+                    <button className="bg-blue-600 cursor-default text-white px-6 py-2 rounded-full text-lg font-black shadow-lg">前往購買</button>
+                    <button onClick={resetGame} className="bg-gray-100 text-gray-600 border-2 border-gray-300 px-6 py-2 rounded-full text-lg font-black hover:bg-gray-200">回到首頁</button>
                   </div>
                 </div>
               </div>
