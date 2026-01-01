@@ -123,12 +123,10 @@ const App: React.FC = () => {
     setTimeout(() => setIsProcessing(false), 500);
   };
 
-  const handleOptionSelect = (isCorrect: boolean) => (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleWrong = () => {
     if (isProcessing) return;
-    if (isCorrect) handleCorrect();
-    else handleWrong();
+    playSound('wrong');
+    setIsFail(true);
   };
 
   const retryLevel = () => setIsFail(false);
@@ -207,15 +205,15 @@ const App: React.FC = () => {
   };
 
   if (isLoading) return (
-    <div className="w-screen min-h-[100svh] min-h-[100dvh] bg-[#060b28] flex flex-col items-center justify-center text-white">
+    <div className="w-screen h-screen bg-[#060b28] flex flex-col items-center justify-center text-white">
       <div className="animate-spin text-6xl mb-4">🦔</div>
       <div className="text-2xl font-bold mb-2">Loading...</div>
     </div>
   );
 
   return (
-    <div className="w-screen min-h-[100svh] min-h-[100dvh] bg-black flex items-center justify-center overflow-hidden">
-      <div className="relative w-full aspect-video max-h-[100svh] max-h-[100dvh] max-w-[177.78svh] max-w-[177.78dvh] bg-[#060b28] shadow-2xl overflow-hidden font-sans select-none">
+    <div className="w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+      <div className="relative w-full aspect-video max-h-screen max-w-[177.78vh] bg-[#060b28] shadow-2xl overflow-hidden font-sans select-none">
 
         {!isAudioInitialized && (<div onClick={initAudio} className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer hover:bg-black/70 transition-colors"><div className="animate-bounce mb-4 text-6xl">👆</div><h1 className="text-4xl text-white font-black font-['Chiron_GoRound_TC'] drop-shadow-lg mb-2">點擊畫面開啟音效</h1></div>)}
 
@@ -264,7 +262,7 @@ const App: React.FC = () => {
               <div className="absolute inset-0 w-full h-full">
                 {/* 怪物動畫邏輯保持不變，因為它們是 absolute 在這個 45% 的容器裡，不會跑到下面去 */}
                 {stage === GameStage.LEVEL_1 && <img src={`${BASE_PATH}/water-monster.png`} className={`absolute top-[10%] right-[10%] h-[80%] object-contain ${showReward ? 'opacity-0' : ''}`} />}
-                {stage === GameStage.LEVEL_2 && <img src={`${BASE_PATH}/sandpaper-monster.png`} className={`absolute top-[15%] right-[5%] h-[70%] object-contain ${showReward ? 'opacity-0' : ''}`} />}
+                {stage === GameStage.LEVEL_2 && <img src={`${BASE_PATH}/sandpaper-monster.png`} className={`absolute top-[20%] right-[5%] h-[70%] object-contain ${showReward ? 'opacity-0' : ''}`} />}
                 {stage === GameStage.LEVEL_3 && <img src={`${BASE_PATH}/glitch-monster.png`} className={`absolute top-[10%] right-[10%] h-[80%] object-contain ${showReward ? 'opacity-0' : ''}`} />}
                 {stage === GameStage.LEVEL_4 && <img src={ASSETS.finalBoss} className={`absolute top-[5%] left-[30%] h-[90%] object-contain ${showReward ? 'opacity-0' : ''}`} />}
               </div>
@@ -289,7 +287,7 @@ const App: React.FC = () => {
 
                   <div className="grid grid-cols-1 gap-2 mt-2">
                     {currentLevel.options.map((opt, idx) => (
-                      <button key={idx} onPointerUp={handleOptionSelect(opt.isCorrect)} disabled={isProcessing} className="bg-blue-50 hover:bg-yellow-50 border-2 border-blue-100 p-3 rounded-xl text-left flex items-center gap-3 active:scale-95 transition-transform">
+                      <button key={idx} onClick={opt.isCorrect ? handleCorrect : handleWrong} disabled={isProcessing} className="bg-blue-50 hover:bg-yellow-50 border-2 border-blue-100 p-3 rounded-xl text-left flex items-center gap-3 active:scale-95 transition-transform">
                         <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow">{idx === 0 ? 'A' : 'B'}</div>
                         <span className="text-base font-bold text-gray-800">{opt.text}</span>
                       </button>
@@ -316,7 +314,7 @@ const App: React.FC = () => {
           <div className="w-full h-full flex flex-col items-center justify-center bg-cover bg-center" style={{ backgroundImage: `url('${ASSETS.summaryBg}')` }}>
             <div className="relative z-10 flex flex-col items-center w-[90%] max-w-3xl">
               {/* 刺蝟圖片：不再限制 max-h，改用 h-[30vh] 彈性高度 */}
-              <img src={ASSETS.hedgehogEnd} alt="Cici" className="h-[clamp(160px,30vh,320px)] md:h-[clamp(220px,35vh,380px)] object-contain mb-[-20px] z-10 animate-float" />
+              <img src={ASSETS.hedgehogEnd} alt="Cici" className="h-[25vh] md:h-[35vh] object-contain mb-[-20px] z-10 animate-float" />
 
               <div className="bg-white/95 rounded-[2rem] border-8 border-yellow-400 p-6 md:p-10 shadow-2xl text-center w-full pt-10">
                 <h2 className="text-2xl md:text-4xl font-black text-blue-900 mb-4">天絲 Plus+ 的秘密</h2>
@@ -341,7 +339,7 @@ const App: React.FC = () => {
           <div className="relative w-full h-full bg-cover bg-[center_top]" style={{ backgroundImage: `url('${ASSETS.endBg}')` }}>
             {/* 優惠券對話框：寬度可調 (max-w-2xl) */}
             <div className="absolute bottom-0 w-full bg-white/95 backdrop-blur-md border-t-8 border-yellow-400 p-4 pb-8 flex flex-col items-center z-50">
-              <div className="w-[min(92vw,620px)] flex flex-col gap-4">
+              <div className="w-full max-w-2xl flex flex-col gap-4"> {/* 👈 這裡調整寬度 max-w-2xl, 3xl, 4xl */}
                 <div className="text-center">
                   <p className="text-lg font-black text-gray-800">請拍攝此畫面，購買 <span className="text-blue-600">天絲PLUS雲柔被1件</span></p>
                   <p className="text-2xl text-red-500 font-black animate-pulse my-1">加贈 "限量版小童枕1個"</p>
@@ -371,7 +369,7 @@ const App: React.FC = () => {
         )}
 
       </div>
-    </div >
+    </div>
   );
 };
 
